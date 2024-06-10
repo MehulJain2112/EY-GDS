@@ -1,0 +1,78 @@
+# Query 3
+SELECT DISTINCT app.profile_id, 
+       CONCAT(app.first_name, ', ', app.last_name) AS customer_name,
+       app.address
+FROM air_ticket_info ati
+JOIN air_passenger_profile app ON ati.profile_id = app.profile_id
+JOIN air_flight af ON ati.flight_id = af.flight_id
+WHERE af.from_location = 'CHENNAI' AND af.to_location = 'HYDERABAD'
+ORDER BY app.profile_id;
+
+# Query 4
+SELECT profile_id
+FROM air_ticket_info
+GROUP BY profile_id
+HAVING COUNT(ticket_id) = (
+    SELECT MAX(ticket_count) 
+    FROM (
+        SELECT COUNT(ticket_id) AS ticket_count
+        FROM air_ticket_info
+        GROUP BY profile_id
+    ) AS ticket_counts
+)
+ORDER BY profile_id;
+
+# Query 5
+SELECT af.flight_id, af.from_location, af.to_location, COUNT(ati.ticket_id) AS No_of_Tickets
+FROM air_ticket_info ati
+JOIN air_flight af ON ati.flight_id = af.flight_id
+WHERE af.airline_name = 'ABC AIRLINES'
+GROUP BY af.flight_id, af.from_location, af.to_location
+HAVING COUNT(ati.ticket_id) > 0
+ORDER BY af.flight_id;
+
+# Query 6
+SELECT afd.flight_id, COUNT(afd.flight_departure_date) AS No_of_Services, SUM(afd.price) AS Total_Price
+FROM air_flight_details afd
+GROUP BY afd.flight_id
+ORDER BY Total_Price DESC, afd.flight_id DESC;
+
+# Query 7
+SELECT ati.flight_id, ati.flight_departure_date, COUNT(ati.ticket_id) AS No_of_Passengers
+FROM air_ticket_info ati
+GROUP BY ati.flight_id, ati.flight_departure_date
+ORDER BY ati.flight_id, ati.flight_departure_date;
+
+# Query 8
+SELECT profile_id
+FROM air_ticket_info
+GROUP BY profile_id
+HAVING COUNT(ticket_id) = (
+    SELECT MIN(ticket_count) 
+    FROM (
+        SELECT COUNT(ticket_id) AS ticket_count
+        FROM air_ticket_info
+        GROUP BY profile_id
+    ) AS ticket_counts
+)
+ORDER BY profile_id;
+
+# Query 9
+SELECT DISTINCT app.profile_id, app.first_name, app.mobile_number, app.email_id
+FROM air_ticket_info ati
+JOIN air_passenger_profile app ON ati.profile_id = app.profile_id
+JOIN air_flight af ON ati.flight_id = af.flight_id
+WHERE af.from_location = 'HYDERABAD' AND af.to_location = 'CHENNAI'
+ORDER BY app.profile_id;
+
+# Query 10
+SELECT DISTINCT app.profile_id, app.first_name, app.last_name, af.flight_id, afd.flight_departure_date,
+       af.departure_time AS actual_departure_time, af.arrival_time AS actual_arrival_time,
+       ADDTIME(af.departure_time, '01:00:00') AS Delayed_Departure_Time,
+       ADDTIME(af.arrival_time, '01:00:00') AS Delayed_Arrival_Time
+FROM air_ticket_info ati
+JOIN air_passenger_profile app ON ati.profile_id = app.profile_id
+JOIN air_flight af ON ati.flight_id = af.flight_id
+JOIN air_flight_details afd ON ati.flight_id = afd.flight_id AND ati.flight_departure_date = afd.flight_departure_date
+WHERE af.from_location = 'CHENNAI' AND af.to_location = 'HYDERABAD' AND afd.flight_departure_date = '2013-05-06'
+ORDER BY app.profile_id;

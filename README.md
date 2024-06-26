@@ -1,118 +1,64 @@
-<!DOCTYPE html>
-<html lang="en">
-<head>
-<meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Customer Registration</title>
-<link rel="stylesheet" href="styles.css"> <!-- External CSS file for styling -->
-</head>
-<body>
-<div class="container">
-  <h2>Customer Registration Form</h2>
-  <form id="customerForm" action="#" method="post">
-    <label for="customerId">ID:</label>
-    <input type="text" id="customerId" name="customerId" required><br><br>
-    
-    <label for="customerName">Name:</label>
-    <input type="text" id="customerName" name="customerName" required><br><br>
-    
-    <label for="customerAge">Age:</label>
-    <input type="number" id="customerAge" name="customerAge" required><br><br>
-    
-    <label for="customerDOB">DOB:</label>
-    <input type="date" id="customerDOB" name="customerDOB" required><br><br>
-    
-    <label for="customerEmail">Email:</label>
-    <input type="email" id="customerEmail" name="customerEmail" required><br><br>
-    
-    <label for="customerAddress">Address:</label>
-    <textarea id="customerAddress" name="customerAddress" rows="4" required></textarea><br><br>
-    
-    <input type="submit" value="Submit">
-  </form>
-</div>
-<script src="validateForm.js"></script> <!-- External JavaScript file for form validation -->
-</body>
-</html>
+  package StreamAPI.casestudy;
 
+import java.util.Arrays;
+import java.util.Comparator;
+import java.util.List;
+import java.util.Map;
+import java.util.stream.Collectors;
 
+public class CandidateStreamingOperations {
 
-body {
-  font-family: Arial, sans-serif;
-  background-color: #f0f0f0;
-  margin: 20px;
-  padding: 20px;
+    public static void main(String[] args) {
+        List<Candidate> candidates = Arrays.asList(
+                new Candidate("John Doe", "Java", "Pune", 3),
+                new Candidate("Jane Smith", "Python", "Mumbai", 1),
+                new Candidate("Mike Johnson", "Java", "Pune", 5),
+                new Candidate("Emily Brown", "JavaScript", "Bangalore", 2),
+                new Candidate("Chris Lee", "Python", "Pune", 4),
+                new Candidate("Sarah Clark", "Java", "Mumbai", 1)
+        );
+
+        // List candidate names from Pune city
+        System.out.println("List of Pune Candidates:");
+        candidates.stream()
+                  .filter(candidate -> candidate.getCity().equalsIgnoreCase("Pune"))
+                  .map(Candidate::getName)
+                  .forEach(System.out::println);
+
+        // List city and count of candidates per city
+        System.out.println("\nCandidate count per city:");
+        Map<String, Long> cityCountMap = candidates.stream()
+                .collect(Collectors.groupingBy(Candidate::getCity, Collectors.counting()));
+        cityCountMap.forEach((city, count) -> System.out.println(city + ": " + count));
+
+        // List technical expertise and count of candidates
+        System.out.println("\nCandidate count by Technical Expertise:");
+        Map<String, Long> expertiseCountMap = candidates.stream()
+                .collect(Collectors.groupingBy(Candidate::getTechnicalExpertise, Collectors.counting()));
+        expertiseCountMap.forEach((expertise, count) -> System.out.println(expertise + ": " + count));
+
+        // List fresher candidates (experience less than or equal to 1 year)
+        System.out.println("\nFresher Candidate list:");
+        candidates.stream()
+                  .filter(candidate -> candidate.getYearsOfExperience() <= 1)
+                  .map(Candidate::getName)
+                  .forEach(System.out::println);
+
+        // Listing candidates with highest experience
+        System.out.println("\nSorted List of Candidates by Experience:");
+        candidates.stream()
+                  .sorted(Comparator.comparingInt(Candidate::getYearsOfExperience).reversed())
+                  .forEach(System.out::println);
+
+        // Sort the candidates by city name
+        printLine();
+        System.out.println("Sorted List of Candidates by City Name:");
+        candidates.stream()
+                  .sorted(Comparator.comparing(Candidate::getCity))
+                  .forEach(System.out::println);
+    }
+
+    private static void printLine() {
+        System.out.println("================");
+    }
 }
-
-.container {
-  max-width: 600px;
-  margin: 0 auto;
-  background-color: #fff;
-  padding: 20px;
-  border-radius: 5px;
-  box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
-}
-
-h2 {
-  text-align: center;
-}
-
-form {
-  display: flex;
-  flex-direction: column;
-}
-
-label {
-  margin-bottom: 10px;
-}
-
-input[type="text"],
-input[type="number"],
-input[type="email"],
-textarea,
-input[type="date"] {
-  width: 100%;
-  padding: 8px;
-  margin-bottom: 15px;
-  border: 1px solid #ccc;
-  border-radius: 4px;
-  box-sizing: border-box;
-}
-
-input[type="submit"] {
-  background-color: #4CAF50;
-  color: white;
-  padding: 10px 20px;
-  border: none;
-  border-radius: 4px;
-  cursor: pointer;
-  font-size: 16px;
-}
-
-input[type="submit"]:hover {
-  background-color: #45a049;
-}
-
-
-
-function validateForm() {
-  var customerId = document.getElementById('customerId').value;
-  var customerName = document.getElementById('customerName').value;
-  var customerAge = document.getElementById('customerAge').value;
-  var customerDOB = document.getElementById('customerDOB').value;
-  var customerEmail = document.getElementById('customerEmail').value;
-  var customerAddress = document.getElementById('customerAddress').value;
-
-  // Simple validation example (you can add more complex checks as needed)
-  if (customerId === '' || customerName === '' || customerAge === '' || customerDOB === '' || customerEmail === '' || customerAddress === '') {
-    alert('All fields must be filled out');
-    return false;
-  }
-  return true;
-}
-
-document.getElementById('customerForm').addEventListener('submit', function(e) {
-  if (!validateForm()) {
-    e.preventDefault(); // Prevent form submission if validation fails
-  }
-});

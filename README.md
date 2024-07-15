@@ -401,3 +401,86 @@ const Login = () => {
 };
 
 export default Login;
+
+
+import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.RequestBody;
+import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RestController;
+
+import java.util.HashMap;
+import java.util.Map;
+
+@RestController
+@RequestMapping("/api/auth")
+public class AuthController {
+
+    @PostMapping("/login")
+    public Map<String, String> login(@RequestBody Map<String, String> loginRequest) {
+        String username = loginRequest.get("username");
+        String password = loginRequest.get("password");
+
+        Map<String, String> response = new HashMap<>();
+        if ("manager".equals(username) && "password".equals(password)) {
+            response.put("status", "success");
+            response.put("message", "Login successful");
+        } else {
+            response.put("status", "failure");
+            response.put("message", "Invalid credentials");
+        }
+
+        return response;
+    }
+}
+
+
+
+import React, { useState } from 'react';
+import axios from 'axios';
+import { useHistory } from 'react-router-dom';
+
+const Login = () => {
+  const [username, setUsername] = useState('');
+  const [password, setPassword] = useState('');
+  const history = useHistory();
+
+  const handleLogin = async (e) => {
+    e.preventDefault();
+    try {
+      const response = await axios.post('http://localhost:8080/api/auth/login', { username, password });
+      if (response.data.status === 'success') {
+        localStorage.setItem('auth', 'true');
+        history.push('/dashboard');
+      } else {
+        alert(response.data.message);
+      }
+    } catch (error) {
+      console.error("Error during login:", error);
+      alert("Error during login");
+    }
+  };
+
+  return (
+    <div>
+      <h2>Login</h2>
+      <form onSubmit={handleLogin}>
+        <input
+          type="text"
+          placeholder="Username"
+          value={username}
+          onChange={(e) => setUsername(e.target.value)}
+        />
+        <input
+          type="password"
+          placeholder="Password"
+          value={password}
+          onChange={(e) => setPassword(e.target.value)}
+        />
+        <button type="submit">Login</button>
+      </form>
+    </div>
+  );
+};
+
+export default Login;
+

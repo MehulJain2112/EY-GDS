@@ -248,3 +248,156 @@ public class CorsConfig {
     }
 }
 
+
+
+import React, { useEffect, useState } from 'react';
+import axios from 'axios';
+
+const Dashboard = () => {
+  const [employees, setEmployees] = useState([]);
+  const [calendarEvents, setCalendarEvents] = useState([]);
+  const [organizationalEvents, setOrganizationalEvents] = useState([]);
+
+  useEffect(() => {
+    const fetchEmployees = async () => {
+      const result = await axios.get('http://localhost:8080/api/employees');
+      setEmployees(result.data);
+    };
+
+    const fetchCalendarEvents = async () => {
+      const result = await axios.get('http://localhost:8080/api/calendar-events');
+      setCalendarEvents(result.data);
+    };
+
+    const fetchOrganizationalEvents = async () => {
+      const result = await axios.get('http://localhost:8080/api/organizational-events');
+      setOrganizationalEvents(result.data);
+    };
+
+    fetchEmployees();
+    fetchCalendarEvents();
+    fetchOrganizationalEvents();
+  }, []);
+
+  return (
+    <div>
+      <h2>Dashboard</h2>
+
+      <div>
+        <h3>Employees</h3>
+        <ul>
+          {employees.map((employee) => (
+            <li key={employee.id}>
+              {employee.name} - {employee.position} - {employee.department}
+            </li>
+          ))}
+        </ul>
+      </div>
+
+      <div>
+        <h3>Calendar Events</h3>
+        <ul>
+          {calendarEvents.map((event) => (
+            <li key={event.id}>
+              {event.title} - {event.date} - {event.type}
+            </li>
+          ))}
+        </ul>
+      </div>
+
+      <div>
+        <h3>Organizational Events</h3>
+        <ul>
+          {organizationalEvents.map((event) => (
+            <li key={event.id}>
+              {event.title} - {event.date}
+            </li>
+          ))}
+        </ul>
+      </div>
+    </div>
+  );
+};
+
+export default Dashboard;
+
+
+
+import React from 'react';
+import { BrowserRouter as Router, Route, Switch, Redirect } from 'react-router-dom';
+import Login from './components/Login';
+import Dashboard from './components/Dashboard';
+import { isAuthenticated } from './services/authService';
+
+const PrivateRoute = ({ component: Component, ...rest }) => (
+  <Route
+    {...rest}
+    render={(props) =>
+      isAuthenticated() ? <Component {...props} /> : <Redirect to="/" />
+    }
+  />
+);
+
+const App = () => {
+  return (
+    <Router>
+      <Switch>
+        <Route exact path="/" component={Login} />
+        <PrivateRoute path="/dashboard" component={Dashboard} />
+        <Redirect to="/" />
+      </Switch>
+    </Router>
+  );
+};
+
+export default App;
+
+
+
+import React, { useState } from 'react';
+import axios from 'axios';
+import { useHistory } from 'react-router-dom';
+
+const Login = () => {
+  const [username, setUsername] = useState('');
+  const [password, setPassword] = useState('');
+  const history = useHistory();
+
+  const handleLogin = async (e) => {
+    e.preventDefault();
+    try {
+      // Simplified login logic for demonstration
+      if (username === 'manager' && password === 'password') {
+        localStorage.setItem('auth', 'true');
+        history.push('/dashboard');
+      } else {
+        alert('Invalid credentials');
+      }
+    } catch (error) {
+      console.error(error);
+    }
+  };
+
+  return (
+    <div>
+      <h2>Login</h2>
+      <form onSubmit={handleLogin}>
+        <input
+          type="text"
+          placeholder="Username"
+          value={username}
+          onChange={(e) => setUsername(e.target.value)}
+        />
+        <input
+          type="password"
+          placeholder="Password"
+          value={password}
+          onChange={(e) => setPassword(e.target.value)}
+        />
+        <button type="submit">Login</button>
+      </form>
+    </div>
+  );
+};
+
+export default Login;

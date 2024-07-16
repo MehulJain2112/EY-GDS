@@ -62,3 +62,26 @@ While implementing REST API authentication what are the different classes that y
 How to handle exceptions in Rest service 
 soap vs rest 
 Rest security (how to secure rest application) 
+
+
+5.	What is a Lambda expression? 
+6.	Interface with default methods
+7.	Explain Executor Framework, Multi-threading in Java 8
+8.	Explain String Immutability?
+9.	How will make a class immutable? 
+ Ans: Should not be able to edit the value inside the object. Make the     setter methods as private and override the constructors.
+10.	Sorting a list of Employee records using Lastname and DOB - use a single Comparator
+Answer: implement compare() with Lastname and then DOB in one method
+11.	What is the difference between a Comparator and a Comparable?
+12.	Java program to check whether a string is a Palindrome
+13.	Spring: Scopes for a bean in Spring - Singleton(default), Request, etc
+14.	Talk about REST and SOAP APIs implementation experience.
+15.	CRUD operations using REST APIs? - GET, POST, PUT
+16.	How will you handle error scenarios in REST APIs?
+17.	Controller Advice option for Global Error Handling - how do you do it?
+18.	AOP concept implementation? - Logging
+19.	What is the most complicated thing that you have worked on in Spring?
+20.	Any experience in MQ, JMS or Kafka?
+21.	Have you consumed any services? How will you do that?
+22.	What tools have you used for Log analysis - Splunk, Kibana, or manual analysis
+

@@ -1,0 +1,64 @@
+Java :
+Describe the immutable aspects of Strings in Java. 
+Describe the different types of Memory Areas in the JVM & what is the use of each. 
+How is session tracking done in a Servlets based application? 
+What is final keyword in java? 
+Can we declare private variables in interface? 
+What is exception handling and explain about checked and unchecked exceptions? 
+What is Multithreading? 
+How HashMap works internally? 
+Why String is immutable? 
+How memory management works in Java? 
+Singleton 
+Explain exception handling in Java and what is try with resource? 
+AutoClosable and Closeable intefaces in try with resource. 
+
+Spring:
+What is Dependency Injection & explain the different injection mechanism? 
+Spring IOC (How to configure beans), bean scope 
+How spring boot works? 
+What Java based configurations in Spring Boot have you used. How will you define them? 
+You have a Data Access Layer. How do you interface & configure with your database from your Spring Boot application? 
+What is the difference between Spring and SpringBoot ? 
+How to configure the Filter for specified controller ? 
+How dispatcher servlet configuration root the request to required controller (Request Flow from Postman to Controller)?  
+What is JDBC template? 
+Which all annotations required in spring boot crud operation process? 
+Spring Lifecyle 
+Explain about dispatcher servlet 
+Spring Scopes 
+How to connect to database in spring and execute query 
+What is the advantage of using spring framework? 
+What are all the Http methods and how do you secure the data 
+Spring annotations      
+Difference between @Controller and @RestController 
+Hibernate configuration 
+about pom.xml file in maven. How to change the version of the jars 
+How database connectivity happens in Spring boot. 
+Does each microservice connects to separate database? 
+What are difference annotations being used in spring boot. 
+What is JWT. What happens if we send JWT token as part of URL. 
+Difference between @Component / @Bean / @Service 
+@Scope usage and different types of bean scopes. 
+ 
+
+Spring Security: 
+What Spring Security implementations have you worked on & explain the implementation context. 
+How authentication and authorization works? 
+Which class needs to be extended at the time of doing authorization? 
+Explain all the annotation used in authentication and authorization process? 
+How Spring security filter chain works? 
+How request will be forwarded to controller after JWT verification? 
+Configure method usage in Spring Security 
+ 
+
+Rest: 
+What is Rest template ? 
+How you will secure your request while sending from API testing tool to server ? 
+Which HTTP request methods are supported by REST ? 
+What is caching in the REST API? 
+How do you keep REST APIs secure? 
+While implementing REST API authentication what are the different classes that you made use of & explain its use. 
+How to handle exceptions in Rest service 
+soap vs rest 
+Rest security (how to secure rest application) 

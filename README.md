@@ -240,3 +240,19 @@ public class CarServiceImpl implements CarService {
                       .orElse(null);
     }
 }
+
+
+package com.ey.service;
+
+import com.ey.model.Car;
+
+import java.util.List;
+import java.util.Set;
+
+public interface CarService {
+    double sumOfPrices(List<Car> carList);
+    List<String> getCarNames(List<Car> carList);
+    Set<String> getCarMakers(List<Car> carList);
+    double getHighPricedCar(List<Car> carList);
+    Car getCarWithLowPricedCar(List<Car> carList);
+}

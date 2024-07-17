@@ -751,5 +751,28 @@ public class EventController {
 }
 
 
+SELECT 
+    e.id AS employee_id,
+    e.name AS employee_name,
+    e.position AS employee_position,
+    e.department AS employee_department,
+    ce.id AS calendar_event_id,
+    ce.title AS calendar_event_title,
+    ce.date AS calendar_event_date,
+    ce.type AS calendar_event_type,
+    oe.id AS organizational_event_id,
+    oe.title AS organizational_event_title,
+    oe.date AS organizational_event_date
+FROM 
+    Employee e
+LEFT JOIN 
+    CalendarEvent ce ON e.id = ce.employee_id
+LEFT JOIN 
+    OrganizationalEvent oe ON e.id = oe.employee_id
+WHERE 
+    e.id = ?;  -- Replace ? with the specific employee ID you want to query
+
+
+
 
 

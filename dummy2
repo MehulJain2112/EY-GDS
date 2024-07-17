@@ -1,1 +1,208 @@
-Hi
+package com.example.ecalendar.model;
+
+import javax.persistence.*;
+import java.util.List;
+
+@Entity
+public class Employee {
+    
+    @Id
+    @GeneratedValue(strategy = GenerationType.IDENTITY)
+    private Long id;
+    private String name;
+    private String position;
+    private String department;
+
+    @OneToMany(mappedBy = "employee", cascade = CascadeType.ALL, orphanRemoval = true)
+    private List<CalendarEvent> calendarEvents;
+
+    @OneToMany(mappedBy = "employee", cascade = CascadeType.ALL, orphanRemoval = true)
+    private List<OrganizationalEvent> organizationalEvents;
+
+    // Getters and setters
+}
+
+
+package com.example.ecalendar.model;
+
+import javax.persistence.*;
+import java.time.LocalDate;
+
+@Entity
+public class CalendarEvent {
+    
+    @Id
+    @GeneratedValue(strategy = GenerationType.IDENTITY)
+    private Long id;
+    private String title;
+    private LocalDate date;
+    private String type; // e.g., "Shift", "Leave"
+
+    @ManyToOne
+    @JoinColumn(name = "employee_id", nullable = false)
+    private Employee employee;
+
+    // Getters and setters
+}
+
+
+package com.example.ecalendar.model;
+
+import javax.persistence.*;
+import java.time.LocalDate;
+
+@Entity
+public class OrganizationalEvent {
+    
+    @Id
+    @GeneratedValue(strategy = GenerationType.IDENTITY)
+    private Long id;
+    private String title;
+    private LocalDate date;
+
+    @ManyToOne
+    @JoinColumn(name = "employee_id", nullable = false)
+    private Employee employee;
+
+    // Getters and setters
+}
+
+
+
+package com.example.ecalendar.controller;
+
+import com.example.ecalendar.model.CalendarEvent;
+import com.example.ecalendar.model.OrganizationalEvent;
+import com.example.ecalendar.repository.CalendarEventRepository;
+import com.example.ecalendar.repository.OrganizationalEventRepository;
+import com.example.ecalendar.repository.EmployeeRepository;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.web.bind.annotation.*;
+
+import java.util.List;
+
+@RestController
+@RequestMapping("/api/events")
+public class EventController {
+
+    @Autowired
+    private CalendarEventRepository calendarEventRepository;
+
+    @Autowired
+    private OrganizationalEventRepository organizationalEventRepository;
+
+    @Autowired
+    private EmployeeRepository employeeRepository;
+
+    @GetMapping("/calendar")
+    public List<CalendarEvent> getAllCalendarEvents() {
+        return calendarEventRepository.findAll();
+    }
+
+    @PostMapping("/calendar/{employeeId}")
+    public CalendarEvent createCalendarEvent(@PathVariable Long employeeId, @RequestBody CalendarEvent event) {
+        return employeeRepository.findById(employeeId).map(employee -> {
+            event.setEmployee(employee);
+            return calendarEventRepository.save(event);
+        }).orElseThrow(() -> new RuntimeException("Employee not found"));
+    }
+
+    @GetMapping("/organizational")
+    public List<OrganizationalEvent> getAllOrganizationalEvents() {
+        return organizationalEventRepository.findAll();
+    }
+
+    @PostMapping("/organizational/{employeeId}")
+    public OrganizationalEvent createOrganizationalEvent(@PathVariable Long employeeId, @RequestBody OrganizationalEvent event) {
+        return employeeRepository.findById(employeeId).map(employee -> {
+            event.setEmployee(employee);
+            return organizationalEventRepository.save(event);
+        }).orElseThrow(() -> new RuntimeException("Employee not found"));
+    }
+}
+
+
+
+import axios from 'axios';
+
+const API_URL = 'http://localhost:8080/api/events';
+
+export const fetchCalendarEvents = () => axios.get(`${API_URL}/calendar`);
+export const createCalendarEvent = (employeeId, event) => axios.post(`${API_URL}/calendar/${employeeId}`, event);
+
+export const fetchOrganizationalEvents = () => axios.get(`${API_URL}/organizational`);
+export const createOrganizationalEvent = (employeeId, event) => axios.post(`${API_URL}/organizational/${employeeId}`, event);
+
+
+
+import React, { useState, useEffect } from 'react';
+import { fetchCalendarEvents, createCalendarEvent, fetchOrganizationalEvents, createOrganizationalEvent } from './api'; // import the axios requests
+
+const EventPage = () => {
+  const [calendarEvents, setCalendarEvents] = useState([]);
+  const [organizationalEvents, setOrganizationalEvents] = useState([]);
+  const [newEvent, setNewEvent] = useState({ date: '', title: '', type: '' });
+  const [employeeId, setEmployeeId] = useState(''); // Add employee ID state
+
+  useEffect(() => {
+    fetchCalendarEvents().then(response => setCalendarEvents(response.data));
+    fetchOrganizationalEvents().then(response => setOrganizationalEvents(response.data));
+  }, []);
+
+  const handleCreateCalendarEvent = () => {
+    createCalendarEvent(employeeId, newEvent).then(response => setCalendarEvents([...calendarEvents, response.data]));
+  };
+
+  const handleCreateOrganizationalEvent = () => {
+    createOrganizationalEvent(employeeId, newEvent).then(response => setOrganizationalEvents([...organizationalEvents, response.data]));
+  };
+
+  return (
+    <div>
+      <h1>Calendar Events</h1>
+      <ul>
+        {calendarEvents.map(event => (
+          <li key={event.id}>{event.date} - {event.title} - {event.type}</li>
+        ))}
+      </ul>
+
+      <h1>Organizational Events</h1>
+      <ul>
+        {organizationalEvents.map(event => (
+          <li key={event.id}>{event.date} - {event.title}</li>
+        ))}
+      </ul>
+
+      <div>
+        <input
+          type="text"
+          placeholder="Employee ID"
+          value={employeeId}
+          onChange={(e) => setEmployeeId(e.target.value)}
+        />
+        <input
+          type="date"
+          value={newEvent.date}
+          onChange={(e) => setNewEvent({ ...newEvent, date: e.target.value })}
+        />
+        <input
+          type="text"
+          placeholder="Title"
+          value={newEvent.title}
+          onChange={(e) => setNewEvent({ ...newEvent, title: e.target.value })}
+        />
+        <input
+          type="text"
+          placeholder="Event Type"
+          value={newEvent.type}
+          onChange={(e) => setNewEvent({ ...newEvent, type: e.target.value })}
+        />
+        <button onClick={handleCreateCalendarEvent}>Create Calendar Event</button>
+        <button onClick={handleCreateOrganizationalEvent}>Create Organizational Event</button>
+      </div>
+    </div>
+  );
+};
+
+export default EventPage;
+

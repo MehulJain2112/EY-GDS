@@ -773,42 +773,50 @@ WHERE
     e.id = ?;  -- Replace ? with the specific employee ID you want to query
 
 
+public Employee updateEmployee(Long id, Employee employeeDetails) {
+        Employee employee = employeeRepository.findById(id).orElse(null);
+        if (employee != null) {
+            employee.setName(employeeDetails.getName());
+            employee.setPosition(employeeDetails.getPosition());
+            employee.setDepartment(employeeDetails.getDepartment());
+            // Update other fields if necessary
+            return employeeRepository.save(employee);
+        }
+        return null;
+    }
 
-SELECT 
-    e.id AS employee_id,
-    e.name AS employee_name,
-    e.position AS employee_position,
-    e.department AS employee_department,
-    event_date,
-    GROUP_CONCAT(DISTINCT calendar_event_title ORDER BY event_date) AS calendar_event_titles,
-    GROUP_CONCAT(DISTINCT calendar_event_type ORDER BY event_date) AS calendar_event_types,
-    GROUP_CONCAT(DISTINCT organizational_event_title ORDER BY event_date) AS organizational_event_titles
-FROM 
-    Employee e
-LEFT JOIN (
-    SELECT 
-        ce.employee_id,
-        ce.date AS event_date,
-        ce.title AS calendar_event_title,
-        ce.type AS calendar_event_type
-    FROM 
-        CalendarEvent ce
-    WHERE 
-        ce.employee_id = ?
-) ce ON e.id = ce.employee_id
-LEFT JOIN (
-    SELECT 
-        oe.employee_id,
-        oe.date AS event_date,
-        oe.title AS organizational_event_title
-    FROM 
-        OrganizationalEvent oe
-    WHERE 
-        oe.employee_id = ?
-) oe ON e.id = oe.employee_id AND ce.event_date = oe.event_date
-WHERE 
-    e.id = ?
-GROUP BY 
-    e.id, event_date
-ORDER BY 
-    event_date;
+    public boolean deleteEmployee(Long id) {
+        Employee employee = employeeRepository.findById(id).orElse(null);
+        if (employee != null) {
+            employeeRepository.delete(employee);
+            return true;
+        }
+        return false;
+    }
+
+
+@PostMapping
+    public ResponseEntity<Employee> createEmployee(@RequestBody Employee employee) {
+        Employee newEmployee = employeeService.createEmployee(employee);
+        return ResponseEntity.ok(newEmployee);
+    }
+
+    @PutMapping("/{id}")
+    public ResponseEntity<Employee> updateEmployee(@PathVariable Long id, @RequestBody Employee employeeDetails) {
+        Employee updatedEmployee = employeeService.updateEmployee(id, employeeDetails);
+        if (updatedEmployee != null) {
+            return ResponseEntity.ok(updatedEmployee);
+        } else {
+            return ResponseEntity.notFound().build();
+        }
+    }
+
+    @DeleteMapping("/{id}")
+    public ResponseEntity<Void> deleteEmployee(@PathVariable Long id) {
+        boolean isDeleted = employeeService.deleteEmployee(id);
+        if (isDeleted) {
+            return ResponseEntity.noContent().build();
+        } else {
+            return ResponseEntity.notFound().build();
+        }
+    }

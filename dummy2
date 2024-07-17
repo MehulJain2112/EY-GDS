@@ -440,6 +440,315 @@ REACT_APP_API_URL=http://localhost:8080/api
   }
 }
 
+------------------------------------------------------
+package com.example.ecalendar.service;
+
+import com.example.ecalendar.model.Employee;
+import com.example.ecalendar.repository.EmployeeRepository;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.stereotype.Service;
+
+import java.util.List;
+
+@Service
+public class EmployeeService {
+
+    @Autowired
+    private EmployeeRepository employeeRepository;
+
+    public List<Employee> getAllEmployees() {
+        return employeeRepository.findAll();
+    }
+
+    public Employee getEmployeeById(Long id) {
+        return employeeRepository.findById(id).orElse(null);
+    }
+
+    public Employee addEmployee(Employee employee) {
+        return employeeRepository.save(employee);
+    }
+
+    public void deleteEmployee(Long id) {
+        employeeRepository.deleteById(id);
+    }
+
+    public Employee updateEmployee(Long id, Employee employeeDetails) {
+        Employee employee = employeeRepository.findById(id).orElse(null);
+        if (employee != null) {
+            employee.setName(employeeDetails.getName());
+            employee.setPosition(employeeDetails.getPosition());
+            employee.setDepartment(employeeDetails.getDepartment());
+            employee.setCalendarEvents(employeeDetails.getCalendarEvents());
+            employee.setOrganizationalEvents(employeeDetails.getOrganizationalEvents());
+            return employeeRepository.save(employee);
+        } else {
+            return null;
+        }
+    }
+}
+
+
+
+package com.example.ecalendar.service;
+
+import com.example.ecalendar.model.CalendarEvent;
+import com.example.ecalendar.repository.CalendarEventRepository;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.stereotype.Service;
+
+import java.util.List;
+
+@Service
+public class CalendarEventService {
+
+    @Autowired
+    private CalendarEventRepository calendarEventRepository;
+
+    public List<CalendarEvent> getAllCalendarEvents() {
+        return calendarEventRepository.findAll();
+    }
+
+    public CalendarEvent getCalendarEventById(Long id) {
+        return calendarEventRepository.findById(id).orElse(null);
+    }
+
+    public CalendarEvent addCalendarEvent(CalendarEvent calendarEvent) {
+        return calendarEventRepository.save(calendarEvent);
+    }
+
+    public void deleteCalendarEvent(Long id) {
+        calendarEventRepository.deleteById(id);
+    }
+
+    public CalendarEvent updateCalendarEvent(Long id, CalendarEvent calendarEventDetails) {
+        CalendarEvent calendarEvent = calendarEventRepository.findById(id).orElse(null);
+        if (calendarEvent != null) {
+            calendarEvent.setTitle(calendarEventDetails.getTitle());
+            calendarEvent.setDate(calendarEventDetails.getDate());
+            calendarEvent.setType(calendarEventDetails.getType());
+            calendarEvent.setEmployee(calendarEventDetails.getEmployee());
+            return calendarEventRepository.save(calendarEvent);
+        } else {
+            return null;
+        }
+    }
+}
+
+
+
+package com.example.ecalendar.service;
+
+import com.example.ecalendar.model.OrganizationalEvent;
+import com.example.ecalendar.repository.OrganizationalEventRepository;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.stereotype.Service;
+
+import java.util.List;
+
+@Service
+public class OrganizationalEventService {
+
+    @Autowired
+    private OrganizationalEventRepository organizationalEventRepository;
+
+    public List<OrganizationalEvent> getAllOrganizationalEvents() {
+        return organizationalEventRepository.findAll();
+    }
+
+    public OrganizationalEvent getOrganizationalEventById(Long id) {
+        return organizationalEventRepository.findById(id).orElse(null);
+    }
+
+    public OrganizationalEvent addOrganizationalEvent(OrganizationalEvent organizationalEvent) {
+        return organizationalEventRepository.save(organizationalEvent);
+    }
+
+    public void deleteOrganizationalEvent(Long id) {
+        organizationalEventRepository.deleteById(id);
+    }
+
+    public OrganizationalEvent updateOrganizationalEvent(Long id, OrganizationalEvent organizationalEventDetails) {
+        OrganizationalEvent organizationalEvent = organizationalEventRepository.findById(id).orElse(null);
+        if (organizationalEvent != null) {
+            organizationalEvent.setTitle(organizationalEventDetails.getTitle());
+            organizationalEvent.setDate(organizationalEventDetails.getDate());
+            organizationalEvent.setEmployee(organizationalEventDetails.getEmployee());
+            return organizationalEventRepository.save(organizationalEvent);
+        } else {
+            return null;
+        }
+    }
+}
+
+
+
+package com.example.ecalendar.controller;
+
+import com.example.ecalendar.model.Employee;
+import com.example.ecalendar.service.EmployeeService;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.ResponseEntity;
+import org.springframework.web.bind.annotation.*;
+
+import java.util.List;
+
+@RestController
+@RequestMapping("/api/employees")
+@CrossOrigin(origins = "http://localhost:3000")
+public class EmployeeController {
+
+    @Autowired
+    private EmployeeService employeeService;
+
+    @GetMapping
+    public List<Employee> getAllEmployees() {
+        return employeeService.getAllEmployees();
+    }
+
+    @GetMapping("/{id}")
+    public ResponseEntity<Employee> getEmployeeById(@PathVariable Long id) {
+        Employee employee = employeeService.getEmployeeById(id);
+        if (employee != null) {
+            return ResponseEntity.ok(employee);
+        } else {
+            return ResponseEntity.notFound().build();
+        }
+    }
+
+    @PostMapping
+    public Employee createEmployee(@RequestBody Employee employee) {
+        return employeeService.addEmployee(employee);
+    }
+
+    @PutMapping("/{id}")
+    public ResponseEntity<Employee> updateEmployee(@PathVariable Long id, @RequestBody Employee employeeDetails) {
+        Employee updatedEmployee = employeeService.updateEmployee(id, employeeDetails);
+        if (updatedEmployee != null) {
+            return ResponseEntity.ok(updatedEmployee);
+        } else {
+            return ResponseEntity.notFound().build();
+        }
+    }
+
+    @DeleteMapping("/{id}")
+    public ResponseEntity<Void> deleteEmployee(@PathVariable Long id) {
+        Employee employee = employeeService.getEmployeeById(id);
+        if (employee != null) {
+            employeeService.deleteEmployee(id);
+            return ResponseEntity.noContent().build();
+        } else {
+            return ResponseEntity.notFound().build();
+        }
+    }
+}
+
+
+
+package com.example.ecalendar.controller;
+
+import com.example.ecalendar.model.CalendarEvent;
+import com.example.ecalendar.model.OrganizationalEvent;
+import com.example.ecalendar.service.CalendarEventService;
+import com.example.ecalendar.service.OrganizationalEventService;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.ResponseEntity;
+import org.springframework.web.bind.annotation.*;
+
+import java.util.List;
+
+@RestController
+@RequestMapping("/api/events")
+@CrossOrigin(origins = "http://localhost:3000")
+public class EventController {
+
+    @Autowired
+    private CalendarEventService calendarEventService;
+
+    @Autowired
+    private OrganizationalEventService organizationalEventService;
+
+    @GetMapping("/calendar")
+    public List<CalendarEvent> getAllCalendarEvents() {
+        return calendarEventService.getAllCalendarEvents();
+    }
+
+    @GetMapping("/calendar/{id}")
+    public ResponseEntity<CalendarEvent> getCalendarEventById(@PathVariable Long id) {
+        CalendarEvent calendarEvent = calendarEventService.getCalendarEventById(id);
+        if (calendarEvent != null) {
+            return ResponseEntity.ok(calendarEvent);
+        } else {
+            return ResponseEntity.notFound().build();
+        }
+    }
+
+    @PostMapping("/calendar")
+    public CalendarEvent createCalendarEvent(@RequestBody CalendarEvent calendarEvent) {
+        return calendarEventService.addCalendarEvent(calendarEvent);
+    }
+
+    @PutMapping("/calendar/{id}")
+    public ResponseEntity<CalendarEvent> updateCalendarEvent(@PathVariable Long id, @RequestBody CalendarEvent calendarEventDetails) {
+        CalendarEvent updatedCalendarEvent = calendarEventService.updateCalendarEvent(id, calendarEventDetails);
+        if (updatedCalendarEvent != null) {
+            return ResponseEntity.ok(updatedCalendarEvent);
+        } else {
+            return ResponseEntity.notFound().build();
+        }
+    }
+
+    @DeleteMapping("/calendar/{id}")
+    public ResponseEntity<Void> deleteCalendarEvent(@PathVariable Long id) {
+        CalendarEvent calendarEvent = calendarEventService.getCalendarEventById(id);
+        if (calendarEvent != null) {
+            calendarEventService.deleteCalendarEvent(id);
+            return ResponseEntity.noContent().build();
+        } else {
+            return ResponseEntity.notFound().build();
+        }
+    }
+
+    @GetMapping("/organizational")
+    public List<OrganizationalEvent> getAllOrganizationalEvents() {
+        return organizationalEventService.getAllOrganizationalEvents();
+    }
+
+    @GetMapping("/organizational/{id}")
+    public ResponseEntity<OrganizationalEvent> getOrganizationalEventById(@PathVariable Long id) {
+        OrganizationalEvent organizationalEvent = organizationalEventService.getOrganizationalEventById(id);
+        if (organizationalEvent != null) {
+            return ResponseEntity.ok(organizationalEvent);
+        } else {
+            return ResponseEntity.notFound().build();
+        }
+    }
+
+    @PostMapping("/organizational")
+    public OrganizationalEvent createOrganizationalEvent(@RequestBody OrganizationalEvent organizationalEvent) {
+        return organizationalEventService.addOrganizationalEvent(organizationalEvent);
+    }
+
+    @PutMapping("/organizational/{id}")
+    public ResponseEntity<OrganizationalEvent> updateOrganizationalEvent(@PathVariable Long id, @RequestBody OrganizationalEvent organizationalEventDetails) {
+        OrganizationalEvent updatedOrganizationalEvent = organizationalEventService.updateOrganizationalEvent(id, organizationalEventDetails);
+        if (updatedOrganizationalEvent != null) {
+            return ResponseEntity.ok(updatedOrganizationalEvent);
+        } else {
+            return ResponseEntity.notFound().build();
+        }
+    }
+
+    @DeleteMapping("/organizational/{id}")
+    public ResponseEntity<Void> deleteOrganizationalEvent(@PathVariable Long id) {
+        OrganizationalEvent organizationalEvent = organizationalEventService.getOrganizationalEventById(id);
+        if (organizationalEvent != null) {
+            organizationalEventService.deleteOrganizationalEvent(id);
+            return ResponseEntity.noContent().build();
+        } else {
+            return ResponseEntity.notFound().build();
+        }
+    }
+}
 
 
 

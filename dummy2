@@ -775,4 +775,25 @@ WHERE
 
 
 
+SELECT 
+    e.id AS employee_id,
+    e.name AS employee_name,
+    e.position AS employee_position,
+    e.department AS employee_department,
+    ce.date AS event_date,
+    GROUP_CONCAT(DISTINCT ce.title ORDER BY ce.date) AS calendar_event_titles,
+    GROUP_CONCAT(DISTINCT ce.type ORDER BY ce.date) AS calendar_event_types,
+    GROUP_CONCAT(DISTINCT oe.title ORDER BY oe.date) AS organizational_event_titles
+FROM 
+    Employee e
+LEFT JOIN 
+    CalendarEvent ce ON e.id = ce.employee_id
+LEFT JOIN 
+    OrganizationalEvent oe ON e.id = oe.employee_id
+WHERE 
+    e.id = ?  -- Replace ? with the specific employee ID you want to query
+GROUP BY 
+    e.id, ce.date
+ORDER BY 
+    ce.date;
 

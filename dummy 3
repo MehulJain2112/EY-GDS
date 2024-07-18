@@ -1,1 +1,321 @@
-hi
+import axios from 'axios';
+
+const API_URL = 'http://localhost:8080/api/auth';
+
+export const login = async (credentials) => {
+  const response = await axios.post(`${API_URL}/login`, credentials);
+  return response.data;
+};
+
+
+
+import axios from 'axios';
+
+const API_URL = 'http://localhost:8080/api/employees';
+
+export const getEmployees = async () => {
+  const response = await axios.get(API_URL);
+  return response.data;
+};
+
+
+import axios from 'axios';
+
+const API_URL = 'http://localhost:8080/api/events/calendar';
+
+export const getCalendarEvents = async () => {
+  const response = await axios.get(API_URL);
+  return response.data;
+};
+
+
+import axios from 'axios';
+
+const API_URL = 'http://localhost:8080/api/events/organizational';
+
+export const getOrganizationalEvents = async () => {
+  const response = await axios.get(API_URL);
+  return response.data;
+};
+
+
+import React, { useState } from 'react';
+import { useHistory } from 'react-router-dom';
+import { login } from '../api/auth';
+
+const LoginPage = () => {
+  const [credentials, setCredentials] = useState({ username: '', password: '' });
+  const history = useHistory();
+
+  const handleChange = (e) => {
+    const { name, value } = e.target;
+    setCredentials({ ...credentials, [name]: value });
+  };
+
+  const handleSubmit = async (e) => {
+    e.preventDefault();
+    try {
+      await login(credentials);
+      history.push('/dashboard');
+    } catch (error) {
+      console.error('Login failed', error);
+    }
+  };
+
+  return (
+    <div>
+      <h2>Login</h2>
+      <form onSubmit={handleSubmit}>
+        <input
+          type="text"
+          name="username"
+          value={credentials.username}
+          onChange={handleChange}
+          placeholder="Username"
+        />
+        <input
+          type="password"
+          name="password"
+          value={credentials.password}
+          onChange={handleChange}
+          placeholder="Password"
+        />
+        <button type="submit">Login</button>
+      </form>
+    </div>
+  );
+};
+
+export default LoginPage;
+
+
+
+import React, { useEffect, useState } from 'react';
+import EmployeeTable from './EmployeeTable';
+import AttendancePieChart from './AttendancePieChart';
+import CalendarView from './CalendarView';
+import { getEmployees } from '../api/employee';
+import { getCalendarEvents } from '../api/calendar';
+import { getOrganizationalEvents } from '../api/organizationalEvent';
+
+const Dashboard = () => {
+  const [employees, setEmployees] = useState([]);
+  const [calendarEvents, setCalendarEvents] = useState([]);
+  const [organizationalEvents, setOrganizationalEvents] = useState([]);
+
+  useEffect(() => {
+    const fetchData = async () => {
+      const employeesData = await getEmployees();
+      setEmployees(employeesData);
+
+      const calendarData = await getCalendarEvents();
+      setCalendarEvents(calendarData);
+
+      const organizationalData = await getOrganizationalEvents();
+      setOrganizationalEvents(organizationalData);
+    };
+    fetchData();
+  }, []);
+
+  return (
+    <div className="dashboard">
+      <EmployeeTable employees={employees} />
+      <AttendancePieChart employees={employees} />
+      <CalendarView calendarEvents={calendarEvents} organizationalEvents={organizationalEvents} />
+    </div>
+  );
+};
+
+export default Dashboard;
+
+
+
+import React from 'react';
+
+const EmployeeTable = ({ employees }) => {
+  return (
+    <div>
+      <h3>Employees</h3>
+      <table>
+        <thead>
+          <tr>
+            <th>Name</th>
+            <th>Position</th>
+            <th>Department</th>
+          </tr>
+        </thead>
+        <tbody>
+          {employees.map(employee => (
+            <tr key={employee.id}>
+              <td>{employee.name}</td>
+              <td>{employee.position}</td>
+              <td>{employee.department}</td>
+            </tr>
+          ))}
+        </tbody>
+      </table>
+    </div>
+  );
+};
+
+export default EmployeeTable;
+
+
+
+import React, { useState } from 'react';
+import { PieChart, Pie, Tooltip, Cell } from 'recharts';
+
+const AttendancePieChart = ({ employees }) => {
+  const [selectedEmployee, setSelectedEmployee] = useState(null);
+  const [attendanceData, setAttendanceData] = useState([]);
+
+  const COLORS = ['#0088FE', '#FF8042'];
+
+  const handleEmployeeClick = (employee) => {
+    const presentDays = // Calculate present days based on calendar events
+    const absentDays = // Calculate absent days based on calendar events
+    setAttendanceData([
+      { name: 'Present', value: presentDays },
+      { name: 'Absent', value: absentDays },
+    ]);
+    setSelectedEmployee(employee);
+  };
+
+  return (
+    <div>
+      <h3>Attendance</h3>
+      {employees.map(employee => (
+        <button key={employee.id} onClick={() => handleEmployeeClick(employee)}>
+          {employee.name}
+        </button>
+      ))}
+      {selectedEmployee && (
+        <PieChart width={400} height={400}>
+          <Pie
+            dataKey="value"
+            isAnimationActive={false}
+            data={attendanceData}
+            cx={200}
+            cy={200}
+            outerRadius={80}
+            fill="#8884d8"
+            label
+          >
+            {attendanceData.map((entry, index) => (
+              <Cell key={`cell-${index}`} fill={COLORS[index % COLORS.length]} />
+            ))}
+          </Pie>
+          <Tooltip />
+        </PieChart>
+      )}
+    </div>
+  );
+};
+
+export default AttendancePieChart;
+
+
+
+import React from 'react';
+import FullCalendar from '@fullcalendar/react';
+import dayGridPlugin from '@fullcalendar/daygrid';
+import timeGridPlugin from '@fullcalendar/timegrid';
+import interactionPlugin from '@fullcalendar/interaction';
+
+const CalendarView = ({ calendarEvents, organizationalEvents }) => {
+  const events = [
+    ...calendarEvents.map(event => ({
+      title: `${event.title} - ${event.type}`,
+      date: event.date,
+      color: event.type === 'Leave' ? 'red' : 'green',
+    })),
+    ...organizationalEvents.map(event => ({
+      title: event.title,
+      date: event.date,
+      color: 'blue',
+    })),
+  ];
+
+  return (
+    <div>
+      <h3>Calendar</h3>
+      <FullCalendar
+        plugins={[dayGridPlugin, timeGridPlugin, interactionPlugin]}
+        initialView="dayGridMonth"
+        events={events}
+        eventContent={(info) => (
+          <div style={{ backgroundColor: info.event.backgroundColor }}>
+            {info.event.title}
+          </div>
+        )}
+      />
+    </div>
+  );
+};
+
+export default CalendarView;
+
+
+
+import React from 'react';
+import { BrowserRouter as Router, Route, Switch } from 'react-router-dom';
+import LoginPage from './components/LoginPage';
+import Dashboard from './components/Dashboard';
+
+const App = () => {
+  return (
+    <Router>
+      <div className="App">
+        <Switch>
+          <Route path="/login" component={LoginPage} />
+          <Route path="/dashboard" component={Dashboard} />
+          <Route path="/" component={LoginPage} />
+        </Switch>
+      </div>
+    </Router>
+      </div>
+    </Router>
+  );
+};
+
+export default App;
+
+
+.App {
+  font-family: Arial, sans-serif;
+  text-align: center;
+}
+
+.dashboard {
+  display: flex;
+  justify-content: space-around;
+  align-items: flex-start;
+}
+
+table {
+  width: 100%;
+  border-collapse: collapse;
+}
+
+table, th, td {
+  border: 1px solid black;
+}
+
+th, td {
+  padding: 10px;
+  text-align: left;
+}
+
+button {
+  margin: 5px;
+  padding: 10px;
+}
+
+h3 {
+  margin-top: 20px;
+}
+
+
+
+
+

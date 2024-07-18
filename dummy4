@@ -82,6 +82,7 @@ public class EmployeeServiceTest {
 
 
 
+
 package com.example.ecalendar.service;
 
 import com.example.ecalendar.model.Employee;
@@ -100,7 +101,7 @@ import java.util.Arrays;
 import java.util.List;
 import java.util.Optional;
 
-import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.*;
 import static org.mockito.Mockito.*;
 
 @ExtendWith(SpringExtension.class)
@@ -123,6 +124,7 @@ public class EmployeeServiceTest {
     public void testGetAllEmployees() {
         logger.info("Starting test for getAllEmployees");
 
+        // Mocking data
         Employee emp1 = new Employee();
         emp1.setId(1L);
         emp1.setName("Mehul");
@@ -138,10 +140,13 @@ public class EmployeeServiceTest {
         List<Employee> employeeList = Arrays.asList(emp1, emp2);
         when(employeeRepository.findAll()).thenReturn(employeeList);
 
+        // Test case: Pass - Check size of list
         List<Employee> result = employeeService.getAllEmployees();
-
         assertEquals(2, result.size());
         verify(employeeRepository, times(1)).findAll();
+
+        // Test case: Fail - Incorrect size assertion
+        assertNotEquals(3, result.size(), "Expected size is not equal to actual size");
 
         logger.info("Completed test for getAllEmployees");
     }
@@ -159,14 +164,16 @@ public class EmployeeServiceTest {
 
         when(employeeRepository.findById(employeeId)).thenReturn(Optional.of(emp));
 
+        // Test case: Pass - Check correct employee details
         Employee result = employeeService.getEmployeeById(employeeId);
-
         assertEquals(employeeId, result.getId());
         assertEquals("Mehul", result.getName());
         assertEquals("Developer", result.getPosition());
         assertEquals("IT", result.getDepartment());
-
         verify(employeeRepository, times(1)).findById(employeeId);
+
+        // Test case: Fail - Incorrect department assertion
+        assertEquals("HR", result.getDepartment(), "Expected department is not equal to actual department");
 
         logger.info("Completed test for getEmployeeById");
     }
@@ -182,13 +189,15 @@ public class EmployeeServiceTest {
 
         when(employeeRepository.save(empToSave)).thenReturn(empToSave);
 
+        // Test case: Pass - Check saved employee details
         Employee savedEmployee = employeeService.saveEmployee(empToSave);
-
         assertEquals("Alice", savedEmployee.getName());
         assertEquals("Engineer", savedEmployee.getPosition());
         assertEquals("Engineering", savedEmployee.getDepartment());
-
         verify(employeeRepository, times(1)).save(empToSave);
+
+        // Test case: Fail - Missing position assertion
+        assertNull(savedEmployee.getPosition(), "Expected position should be null");
 
         logger.info("Completed test for saveEmployee");
     }
@@ -210,14 +219,16 @@ public class EmployeeServiceTest {
         when(employeeRepository.findById(employeeId)).thenReturn(Optional.of(existingEmployee));
         when(employeeRepository.save(existingEmployee)).thenReturn(existingEmployee);
 
+        // Test case: Pass - Check updated employee details
         Employee updatedEmployee = employeeService.updateEmployee(employeeId, updatedEmployeeData);
-
         assertEquals("John Doe", updatedEmployee.getName());
         assertEquals("Manager", updatedEmployee.getPosition()); // Position should not change
         assertEquals("Sales", updatedEmployee.getDepartment()); // Department should not change
-
         verify(employeeRepository, times(1)).findById(employeeId);
         verify(employeeRepository, times(1)).save(existingEmployee);
+
+        // Test case: Fail - Incorrect name assertion
+        assertEquals("Jane Doe", updatedEmployee.getName(), "Expected name is not equal to actual name");
 
         logger.info("Completed test for updateEmployee");
     }
@@ -235,10 +246,13 @@ public class EmployeeServiceTest {
 
         when(employeeRepository.findById(employeeId)).thenReturn(Optional.of(existingEmployee));
 
+        // Test case: Pass - Check deletion of employee
         employeeService.deleteEmployee(employeeId);
-
         verify(employeeRepository, times(1)).findById(employeeId);
         verify(employeeRepository, times(1)).deleteById(employeeId);
+
+        // Test case: Fail - Verify non-existence after deletion
+        assertNull(employeeService.getEmployeeById(employeeId), "Employee still exists after deletion");
 
         logger.info("Completed test for deleteEmployee");
     }

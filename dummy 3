@@ -317,5 +317,122 @@ h3 {
 
 
 
+import React from 'react';
+import { PieChart, Pie, Cell, Tooltip, Legend } from 'recharts';
+
+const AttendancePieChart = ({ attendanceData }) => {
+  const colors = ['#00C49F', '#FF8042'];
+
+  const absentDays = attendanceData
+    .filter(event => event.type === 'Leave')
+    .length;
+  const presentDays = attendanceData
+    .filter(event => event.type === 'Work')
+    .length;
+
+  const data = [
+    { name: 'Present', value: presentDays },
+    { name: 'Absent', value: absentDays },
+  ];
+
+  return (
+    <PieChart width={400} height={400}>
+      <Pie data={data} dataKey="value" nameKey="name" cx="50%" cy="50%" outerRadius={150} fill="#8884d8">
+        {data.map((entry, index) => (
+          <Cell key={`cell-${index}`} fill={colors[index % colors.length]} />
+        ))}
+      </Pie>
+      <Tooltip />
+      <Legend />
+    </PieChart>
+  );
+};
+
+export default AttendancePieChart;
+
+
+
+import React, { useState, useEffect } from 'react';
+import axios from 'axios';
+import FullCalendar from '@fullcalendar/react';
+import dayGridPlugin from '@fullcalendar/daygrid';
+import AttendancePieChart from './AttendancePieChart';
+import './App.css';
+
+const Dashboard = () => {
+  const [employees, setEmployees] = useState([]);
+  const [calendarEvents, setCalendarEvents] = useState([]);
+  const [organizationalEvents, setOrganizationalEvents] = useState([]);
+  const [selectedEmployee, setSelectedEmployee] = useState(null);
+  const [attendanceData, setAttendanceData] = useState([]);
+
+  useEffect(() => {
+    axios.get('http://localhost:8080/api/employees')
+      .then(response => setEmployees(response.data))
+      .catch(error => console.error(error));
+
+    axios.get('http://localhost:8080/api/events/calendar')
+      .then(response => setCalendarEvents(response.data))
+      .catch(error => console.error(error));
+
+    axios.get('http://localhost:8080/api/events/organizational')
+      .then(response => setOrganizationalEvents(response.data))
+      .catch(error => console.error(error));
+  }, []);
+
+  const handleEmployeeClick = (employee) => {
+    setSelectedEmployee(employee);
+    const events = calendarEvents.filter(event => event.employeeId === employee.id);
+    setAttendanceData(events);
+  };
+
+  return (
+    <div className="dashboard">
+      <div className="employee-table">
+        <h3>Employee Details</h3>
+        <table>
+          <thead>
+            <tr>
+              <th>Name</th>
+              <th>Position</th>
+              <th>Department</th>
+              <th>Actions</th>
+            </tr>
+          </thead>
+          <tbody>
+            {employees.map(employee => (
+              <tr key={employee.id}>
+                <td>{employee.name}</td>
+                <td>{employee.position}</td>
+                <td>{employee.department}</td>
+                <td>
+                  <button onClick={() => handleEmployeeClick(employee)}>View Attendance</button>
+                </td>
+              </tr>
+            ))}
+          </tbody>
+        </table>
+      </div>
+      <div className="attendance-chart">
+        <h3>Attendance Chart</h3>
+        <AttendancePieChart attendanceData={attendanceData} />
+      </div>
+      <div className="calendar-view">
+        <h3>Calendar View</h3>
+        <FullCalendar
+          plugins={[dayGridPlugin]}
+          initialView="dayGridMonth"
+          events={[...calendarEvents, ...organizationalEvents].map(event => ({
+            title: event.title,
+            date: event.date,
+            backgroundColor: event.type === 'Work' ? '#00C49F' : event.type === 'Leave' ? '#FF8042' : '#8884d8'
+          }))}
+        />
+      </div>
+    </div>
+  );
+};
+
+export default Dashboard;
 
 

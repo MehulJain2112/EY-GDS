@@ -434,3 +434,326 @@ public class EmployeeServiceTest {
         logger.info("Completed test for deleteEmployee");
     }
 }
+
+
+
+package com.example.ecalendar.service;
+
+import com.example.ecalendar.model.CalendarEvent;
+import com.example.ecalendar.repository.CalendarEventRepository;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
+import org.mockito.InjectMocks;
+import org.mockito.Mock;
+import org.mockito.MockitoAnnotations;
+
+import java.time.LocalDate;
+import java.util.Optional;
+
+import static org.junit.jupiter.api.Assertions.*;
+import static org.mockito.Mockito.*;
+
+public class CalendarEventServiceTest {
+
+    @Mock
+    private CalendarEventRepository calendarEventRepository;
+
+    @InjectMocks
+    private CalendarEventService calendarEventService;
+
+    @BeforeEach
+    public void setUp() {
+        MockitoAnnotations.openMocks(this);
+    }
+
+    @Test
+    public void testGetAllCalendarEvents() {
+        calendarEventService.getAllCalendarEvents();
+        verify(calendarEventRepository, times(1)).findAll();
+    }
+
+    @Test
+    public void testGetCalendarEventById_Success() {
+        CalendarEvent event = new CalendarEvent();
+        event.setId(1L);
+        when(calendarEventRepository.findById(1L)).thenReturn(Optional.of(event));
+        CalendarEvent foundEvent = calendarEventService.getCalendarEventById(1L);
+        assertNotNull(foundEvent);
+        assertEquals(1L, foundEvent.getId());
+    }
+
+    @Test
+    public void testGetCalendarEventById_Fail() {
+        when(calendarEventRepository.findById(1L)).thenReturn(Optional.empty());
+        CalendarEvent foundEvent = calendarEventService.getCalendarEventById(1L);
+        assertNull(foundEvent);
+    }
+
+    @Test
+    public void testAddCalendarEvent() {
+        CalendarEvent event = new CalendarEvent();
+        event.setTitle("Meeting");
+        event.setDate(LocalDate.now());
+        event.setType("Work");
+        when(calendarEventRepository.save(event)).thenReturn(event);
+        CalendarEvent savedEvent = calendarEventService.addCalendarEvent(event);
+        assertNotNull(savedEvent);
+        assertEquals("Meeting", savedEvent.getTitle());
+    }
+
+    @Test
+    public void testUpdateCalendarEvent_Success() {
+        CalendarEvent event = new CalendarEvent();
+        event.setId(1L);
+        event.setTitle("Old Title");
+        when(calendarEventRepository.findById(1L)).thenReturn(Optional.of(event));
+
+        CalendarEvent updatedEvent = new CalendarEvent();
+        updatedEvent.setTitle("New Title");
+
+        CalendarEvent result = calendarEventService.updateCalendarEvent(1L, updatedEvent);
+        assertNotNull(result);
+        assertEquals("New Title", result.getTitle());
+    }
+
+    @Test
+    public void testUpdateCalendarEvent_Fail() {
+        when(calendarEventRepository.findById(1L)).thenReturn(Optional.empty());
+        CalendarEvent updatedEvent = new CalendarEvent();
+        updatedEvent.setTitle("New Title");
+        CalendarEvent result = calendarEventService.updateCalendarEvent(1L, updatedEvent);
+        assertNull(result);
+    }
+
+    @Test
+    public void testDeleteCalendarEvent() {
+        CalendarEvent event = new CalendarEvent();
+        event.setId(1L);
+        when(calendarEventRepository.findById(1L)).thenReturn(Optional.of(event));
+        calendarEventService.deleteCalendarEvent(1L);
+        verify(calendarEventRepository, times(1)).deleteById(1L);
+    }
+}
+
+
+
+package com.example.ecalendar.service;
+
+import com.example.ecalendar.model.OrganizationalEvent;
+import com.example.ecalendar.repository.OrganizationalEventRepository;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
+import org.mockito.InjectMocks;
+import org.mockito.Mock;
+import org.mockito.MockitoAnnotations;
+
+import java.time.LocalDate;
+import java.util.Optional;
+
+import static org.junit.jupiter.api.Assertions.*;
+import static org.mockito.Mockito.*;
+
+public class OrganizationalEventServiceTest {
+
+    @Mock
+    private OrganizationalEventRepository organizationalEventRepository;
+
+    @InjectMocks
+    private OrganizationalEventService organizationalEventService;
+
+    @BeforeEach
+    public void setUp() {
+        MockitoAnnotations.openMocks(this);
+    }
+
+    @Test
+    public void testGetAllOrganizationalEvents() {
+        organizationalEventService.getAllOrganizationalEvents();
+        verify(organizationalEventRepository, times(1)).findAll();
+    }
+
+    @Test
+    public void testGetOrganizationalEventById_Success() {
+        OrganizationalEvent event = new OrganizationalEvent();
+        event.setId(1L);
+        when(organizationalEventRepository.findById(1L)).thenReturn(Optional.of(event));
+        OrganizationalEvent foundEvent = organizationalEventService.getOrganizationalEventById(1L);
+        assertNotNull(foundEvent);
+        assertEquals(1L, foundEvent.getId());
+    }
+
+    @Test
+    public void testGetOrganizationalEventById_Fail() {
+        when(organizationalEventRepository.findById(1L)).thenReturn(Optional.empty());
+        OrganizationalEvent foundEvent = organizationalEventService.getOrganizationalEventById(1L);
+        assertNull(foundEvent);
+    }
+
+    @Test
+    public void testAddOrganizationalEvent() {
+        OrganizationalEvent event = new OrganizationalEvent();
+        event.setTitle("Conference");
+        event.setDate(LocalDate.now());
+        when(organizationalEventRepository.save(event)).thenReturn(event);
+        OrganizationalEvent savedEvent = organizationalEventService.addOrganizationalEvent(event);
+        assertNotNull(savedEvent);
+        assertEquals("Conference", savedEvent.getTitle());
+    }
+
+    @Test
+    public void testUpdateOrganizationalEvent_Success() {
+        OrganizationalEvent event = new OrganizationalEvent();
+        event.setId(1L);
+        event.setTitle("Old Title");
+        when(organizationalEventRepository.findById(1L)).thenReturn(Optional.of(event));
+
+        OrganizationalEvent updatedEvent = new OrganizationalEvent();
+        updatedEvent.setTitle("New Title");
+
+        OrganizationalEvent result = organizationalEventService.updateOrganizationalEvent(1L, updatedEvent);
+        assertNotNull(result);
+        assertEquals("New Title", result.getTitle());
+    }
+
+    @Test
+    public void testUpdateOrganizationalEvent_Fail() {
+        when(organizationalEventRepository.findById(1L)).thenReturn(Optional.empty());
+        OrganizationalEvent updatedEvent = new OrganizationalEvent();
+        updatedEvent.setTitle("New Title");
+        OrganizationalEvent result = organizationalEventService.updateOrganizationalEvent(1L, updatedEvent);
+        assertNull(result);
+    }
+
+    @Test
+    public void testDeleteOrganizationalEvent() {
+        OrganizationalEvent event = new OrganizationalEvent();
+        event.setId(1L);
+        when(organizationalEventRepository.findById(1L)).thenReturn(Optional.of(event));
+        organizationalEventService.deleteOrganizationalEvent(1L);
+        verify(organizationalEventRepository, times(1)).deleteById(1L);
+    }
+}
+
+
+
+package com.example.ecalendar.controller;
+
+import com.example.ecalendar.model.CalendarEvent;
+import com.example.ecalendar.model.OrganizationalEvent;
+import com.example.ecalendar.service.CalendarEventService;
+import com.example.ecalendar.service.OrganizationalEventService;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
+import org.mockito.InjectMocks;
+import org.mockito.Mock;
+import org.mockito.MockitoAnnotations;
+import org.springframework.http.MediaType;
+import org.springframework.http.ResponseEntity;
+import org.springframework.test.web.servlet.MockMvc;
+import org.springframework.test.web.servlet.setup.MockMvcBuilders;
+
+import java.time.LocalDate;
+import java.util.Arrays;
+import java.util.List;
+
+import static org.hamcrest.Matchers.*;
+import static org.mockito.Mockito.*;
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.*;
+import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.*;
+
+public class EventControllerTest {
+
+    private MockMvc mockMvc;
+
+    @Mock
+    private CalendarEventService calendarEventService;
+
+    @Mock
+    private OrganizationalEventService organizationalEventService;
+
+    @InjectMocks
+    private EventController eventController;
+
+    @BeforeEach
+    public void setUp() {
+        MockitoAnnotations.openMocks(this);
+        this.mockMvc = MockMvcBuilders.standaloneSetup(eventController).build();
+    }
+
+    @Test
+    public void testGetAllCalendarEvents() throws Exception {
+        CalendarEvent event1 = new CalendarEvent(1L, "Meeting", LocalDate.now(), "Work", null);
+        CalendarEvent event2 = new CalendarEvent(2L, "Leave", LocalDate.now().plusDays(1), "Leave", null);
+        List<CalendarEvent> events = Arrays.asList(event1, event2);
+
+        when(calendarEventService.getAllCalendarEvents()).thenReturn(events);
+
+        mockMvc.perform(get("/api/events/calendar"))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$", hasSize(2)))
+                .andExpect(jsonPath("$[0].title", is("Meeting")))
+                .andExpect(jsonPath("$[1].title", is("Leave")));
+    }
+
+    @Test
+    public void testCreateCalendarEvent() throws Exception {
+        CalendarEvent event = new CalendarEvent(1L, "Meeting", LocalDate.now(), "Work", null);
+
+        when(calendarEventService.addCalendarEvent(any(CalendarEvent.class))).thenReturn(event);
+
+        mockMvc.perform(post("/api/events/calendar")
+                .contentType(MediaType.APPLICATION_JSON)
+                .content("{\"title\":\"Meeting\",\"date\":\"2024-07-18\",\"type\":\"Work\",\"employeeId\":1}"))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.title", is("Meeting")));
+    }
+
+    @Test
+    public void testCreateCalendarEvent_Fail() throws Exception {
+        when(calendarEventService.addCalendarEvent(any(CalendarEvent.class))).thenThrow(new RuntimeException("Test Exception"));
+
+        mockMvc.perform(post("/api/events/calendar")
+                .contentType(MediaType.APPLICATION_JSON)
+                .content("{\"title\":\"Meeting\",\"date\":\"2024-07-18\",\"type\":\"Work\",\"employeeId\":1}"))
+                .andExpect(status().isInternalServerError());
+    }
+
+    @Test
+    public void testUpdateCalendarEvent_Success() throws Exception {
+        CalendarEvent event = new CalendarEvent(1L, "Updated Meeting", LocalDate.now(), "Work", null);
+
+        when(calendarEventService.updateCalendarEvent(eq(1L), any(CalendarEvent.class))).thenReturn(event);
+
+        mockMvc.perform(put("/api/events/calendar/1")
+                .contentType(MediaType.APPLICATION_JSON)
+                .content("{\"title\":\"Updated Meeting\",\"date\":\"2024-07-18\",\"type\":\"Work\",\"employeeId\":1}"))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.title", is("Updated Meeting")));
+    }
+
+    @Test
+    public void testUpdateCalendarEvent_Fail() throws Exception {
+        when(calendarEventService.updateCalendarEvent(eq(1L), any(CalendarEvent.class))).thenReturn(null);
+
+        mockMvc.perform(put("/api/events/calendar/1")
+                .contentType(MediaType.APPLICATION_JSON)
+                .content("{\"title\":\"Updated Meeting\",\"date\":\"2024-07-18\",\"type\":\"Work\",\"employeeId\":1}"))
+                .andExpect(status().isNotFound());
+    }
+
+    @Test
+    public void testDeleteCalendarEvent_Success() throws Exception {
+        doNothing().when(calendarEventService).deleteCalendarEvent(1L);
+
+        mockMvc.perform(delete("/api/events/calendar/1"))
+                .andExpect(status().isOk());
+    }
+
+    @Test
+    public void testDeleteCalendarEvent_Fail() throws Exception {
+        doThrow(new RuntimeException("Test Exception")).when(calendarEventService).deleteCalendarEvent(1L);
+
+        mockMvc.perform(delete("/api/events/calendar/1"))
+                .andExpect(status().isInternalServerError());
+    }
+}
